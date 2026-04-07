@@ -130,15 +130,17 @@ class Support extends BaseController
 
         $updateData = [];
         if ($status) {
-            if ($status != $ticket['status']) {
-                $this->logChange($id, 'status_change', $ticket['status'], $status, "Ticket status updated to {$status}");
+            $oldStatus = $ticket['status'] ?? 'Open';
+            if ($status != $oldStatus) {
+                $this->logChange($id, 'status_change', $oldStatus, $status, "Ticket status updated to {$status}");
             }
             $updateData['status'] = $status;
         }
 
         if ($remark !== null) {
-            if ($remark != $ticket['agent_remark']) {
-                $this->logChange($id, 'remark_update', $ticket['agent_remark'], $remark, "Ticket remark updated");
+            $oldRemark = $ticket['agent_remark'] ?? '';
+            if ($remark != $oldRemark) {
+                $this->logChange($id, 'remark_update', $oldRemark, $remark, "Ticket remark updated");
             }
             $updateData['agent_remark'] = $remark;
         }
