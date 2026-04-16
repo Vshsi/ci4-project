@@ -15,7 +15,7 @@ class Home extends BaseController
         $userModel = new UserModel();
         
         $data = [
-            'users' => $userModel->select('id, username, first_name, last_name, phone, email, password, photo')->paginate(10),
+            'users' => $userModel->select('id, username, first_name, last_name, mobile, email, email_id, paswd, profile_image, active, designation_id')->paginate(10),
             'pager' => $userModel->pager,
         ];
 
@@ -30,7 +30,7 @@ class Home extends BaseController
 
         $userModel = new \App\Models\UserModel();
         $data = [
-            'currentUser' => $userModel->select('id, username, first_name, last_name, phone, email, password, photo')->find(session()->get('user_id'))
+            'currentUser' => $userModel->select('id, username, first_name, last_name, mobile, email, email_id, paswd, profile_image, active, designation_id')->find(session()->get('user_id'))
         ];
 
         return view('admin/profile', $data);
@@ -44,7 +44,7 @@ class Home extends BaseController
 
         $userModel = new \App\Models\UserModel();
         $data = [
-            'users' => $userModel->select('id, username, first_name, last_name, phone, email, password, photo')->paginate(10),
+            'users' => $userModel->select('id, username, first_name, last_name, mobile, email, email_id, profile_image, designation_id, active')->paginate(10),
             'pager' => $userModel->pager
         ];
 
@@ -64,19 +64,19 @@ class Home extends BaseController
     {
         $username   = $this->request->getPost('username');
         $email      = $this->request->getPost('email');
-        $password   = $this->request->getPost('password');
-        $phone      = $this->request->getPost('phone');
+        $paswd      = $this->request->getPost('password');
+        $mobile     = $this->request->getPost('phone');
         $firstName  = $this->request->getPost('first_name');
         $lastName   = $this->request->getPost('last_name');
 
         // 1. EMPTY CHECK
-        if (empty($username) || empty($email) || empty($password) || empty($phone)) {
-            $f = empty($username) ? 'username' : (empty($email) ? 'email' : (empty($phone) ? 'phone' : 'password'));
+        if (empty($username) || empty($email) || empty($paswd) || empty($mobile)) {
+            $f = empty($username) ? 'username' : (empty($email) ? 'email' : (empty($mobile) ? 'phone' : 'password'));
             return $this->response->setJSON(['status' => 'error', 'field' => $f, 'message' => 'Please fill this field!']);
         }
 
         // 2. PHONE VALIDATION
-        if (!is_numeric($phone) || strlen($phone) != 10) {
+        if (!is_numeric($mobile) || strlen($mobile) != 10) {
             return $this->response->setJSON(['status' => 'error', 'field' => 'phone', 'message' => 'Phone must be exactly 10 digits!']);
         }
 
@@ -124,9 +124,12 @@ class Home extends BaseController
             'username'   => $username,
             'first_name' => $firstName,
             'last_name'  => $lastName,
-            'phone'      => $phone, 
+            'mobile'     => $mobile, 
             'email'      => $email,
-            'password'   => password_hash($password, PASSWORD_DEFAULT)
+            'email_id'   => $email, // Sync with teacher's other email field
+            'paswd'      => password_hash($paswd, PASSWORD_DEFAULT),
+            'user_type_id' => 2, // Default to user type
+            'active'     => 1
         ]);
 
         return $this->response->setJSON([
@@ -191,7 +194,7 @@ class Home extends BaseController
     public function editUser($id)
     {
         $userModel = new \App\Models\UserModel();
-        $user = $userModel->select('id, username, first_name, last_name, phone, email, password, photo')->find($id); // Get just THIS user
+        $user = $userModel->select('id, username, first_name, last_name, mobile, email, email_id, paswd, profile_image, designation_id')->find($id); // Get just THIS user
 
         if (!$user) {
             return redirect()->to('/home');
@@ -207,17 +210,17 @@ class Home extends BaseController
         $username   = $this->request->getPost('username');
         $firstName  = $this->request->getPost('first_name');
         $lastName   = $this->request->getPost('last_name');
-        $phone      = $this->request->getPost('phone');
+        $mobile     = $this->request->getPost('phone');
         $email      = $this->request->getPost('email');
 
         // 1. BLANK CHECKS
-        if (empty($username) || empty($firstName) || empty($phone) || empty($email)) {
-            $f = empty($username) ? 'username' : (empty($firstName) ? 'first_name' : (empty($phone) ? 'phone' : 'email'));
+        if (empty($username) || empty($firstName) || empty($mobile) || empty($email)) {
+            $f = empty($username) ? 'username' : (empty($firstName) ? 'first_name' : (empty($mobile) ? 'phone' : 'email'));
             return $this->response->setJSON(['status' => 'error', 'field' => $f, 'message' => 'This field cannot be blank!']);
         }
 
         // 2. PHONE VALIDATION
-        if (!is_numeric($phone) || strlen($phone) != 10) {
+        if (!is_numeric($mobile) || strlen($mobile) != 10) {
             return $this->response->setJSON(['status' => 'error', 'field' => 'phone', 'message' => 'Phone must be exactly 10 digits!']);
         }
 
@@ -242,19 +245,17 @@ class Home extends BaseController
             'username'   => $username,
             'first_name' => $firstName,
             'last_name'  => $lastName,
-            'phone'      => $phone,
-            'email'      => $email
+            'mobile'     => $mobile,
+            'email'      => $email,
+            'email_id'   => $email
         ];
 
-        // 6. PHOTO UPLOAD LOGIC
+        // 6. PHOTO UPLOAD LOGIC (FILESYSTEM)
         $file = $this->request->getFile('photo');
         if ($file && $file->isValid() && !$file->hasMoved()) {
             $newName = $file->getRandomName();
-            
-            // Read file content and encode as hex for Postgres BYTEA column
-            $updateData['photo_data'] = bin2hex(file_get_contents($file->getTempName()));
-            $updateData['photo_mime'] = $file->getMimeType();
-            $updateData['photo']      = $newName;
+            $file->move(FCPATH . 'uploads/profiles', $newName);
+            $updateData['profile_image'] = $newName;
         }
 
         // SAVE CHANGES
@@ -264,7 +265,7 @@ class Home extends BaseController
         if ($id == session()->get('user_id')) {
             session()->set('username', $username);
             if (isset($newName)) {
-                session()->set('photo', $newName);
+                session()->set('profile_image', $newName);
             }
         }
 

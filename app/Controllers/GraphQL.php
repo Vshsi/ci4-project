@@ -91,6 +91,35 @@ class GraphQL extends BaseController
         $builder = $db->table($table);
         $data = (array)$input->variables;
 
+        // --- SCHEEMA COMPATIBILITY MAPPING (FOR USER TABLE) ---
+        if ($table === 'users') {
+            // Map 'phone' to 'mobile' if provided
+            if (isset($data['phone'])) {
+                $data['mobile'] = $data['phone'];
+                unset($data['phone']);
+            }
+            // Map 'password' to 'paswd' and HASH IT
+            if (isset($data['password'])) {
+                $data['paswd'] = password_hash($data['password'], PASSWORD_DEFAULT);
+                unset($data['password']);
+            }
+            // Sync email_id with email
+            if (isset($data['email'])) {
+                $data['email_id'] = $data['email'];
+            }
+            // Ensure status/active is set for new users
+            if (!isset($data['active'])) {
+                $data['active'] = 1;
+            }
+            if (!isset($data['status'])) {
+                $data['status'] = 'active';
+            }
+            // Default user_type_id if not set (2 = Student)
+            if (!isset($data['user_type_id'])) {
+                $data['user_type_id'] = 2;
+            }
+        }
+
         if ($builder->insert($data)) {
             return $this->response->setJSON(['data' => ['insert' => ['id' => $db->insertID(), 'status' => 'Success']]]);
         }

@@ -15,7 +15,7 @@ class Support extends BaseController
 
         $ticketModel = new SupportTicketModel();
         $data = [
-            'tickets' => $ticketModel->select('id, user_id, title, subject, category, priority, communication_medium, description, attachment, status, department_id, assigned_to, agent_remark, created_at, updated_at')
+            'tickets' => $ticketModel->select('id, user_id, title, category, priority, communication_method, description, attachment_name, status, department_id, assigned_to, agent_remark, created_at, updated_at')
                                      ->where('user_id', session()->get('user_id'))
                                      ->orderBy('id', 'DESC')
                                      ->paginate(10),
@@ -35,7 +35,7 @@ class Support extends BaseController
         $ticketModel = new SupportTicketModel();
         // Fetch original tickets with high-end pagination (10 per page)
         $data = [
-            'tickets' => $ticketModel->select('id, user_id, title, subject, category, priority, communication_medium, description, attachment, status, department_id, assigned_to, agent_remark, created_at, updated_at')
+            'tickets' => $ticketModel->select('id, user_id, title, category, priority, communication_method, description, attachment_name, status, department_id, assigned_to, agent_remark, created_at, updated_at')
                                      ->orderBy('id', 'DESC')->paginate(10),
             'pager'   => $ticketModel->pager,
             'totalTickets' => $ticketModel->countAllResults(false)
@@ -68,26 +68,20 @@ class Support extends BaseController
 
         // Handle attachment upload (INLINE DB STORAGE)
         $attachmentName = null;
-        $attachmentData = null;
-        $attachmentMime = null;
         $file = $this->request->getFile('attachment');
         if ($file && $file->isValid() && !$file->hasMoved()) {
             $attachmentName = $file->getRandomName();
-            $attachmentData = bin2hex(file_get_contents($file->getTempName()));
-            $attachmentMime = $file->getMimeType();
+            $file->move(FCPATH . 'uploads/tickets', $attachmentName);
         }
 
         $data = [
             'user_id'              => session()->get('user_id'),
             'title'                => $this->request->getPost('subject'), 
-            'subject'              => $this->request->getPost('subject'),
             'category'             => $this->request->getPost('category'),
-            'priority'             => $this->request->getPost('priority'),
-            'communication_medium' => $this->request->getPost('communication_medium'),
+            'priority'             => ucfirst(strtolower($this->request->getPost('priority'))),
+            'communication_method' => $this->request->getPost('communication_medium'),
             'description'          => $this->request->getPost('description'),
-            'attachment'           => $attachmentName,
-            'attachment_data'      => $attachmentData,
-            'attachment_mime'      => $attachmentMime,
+            'attachment_name'      => $attachmentName,
             'status'               => 'Open',
             'department_id'        => null,
             'assigned_to'          => null,
@@ -107,7 +101,7 @@ class Support extends BaseController
         $ticketModel = new SupportTicketModel();
         
         // CRITICAL: Do NOT pull attachment_data here, it is too large for JSON memory
-        $ticket = $ticketModel->select('id, user_id, title, subject, category, priority, communication_medium, description, attachment, status, department_id, assigned_to, agent_remark, created_at, updated_at')
+        $ticket = $ticketModel->select('id, user_id, title, category, priority, communication_method, description, attachment_name, status, department_id, assigned_to, agent_remark, created_at, updated_at')
                               ->find($id);
 
         if ($ticket) {
@@ -120,7 +114,7 @@ class Support extends BaseController
     {
         $ticketModel = new SupportTicketModel();
         
-        $ticket = $ticketModel->select('id, user_id, title, subject, category, priority, communication_medium, description, attachment, status, department_id, assigned_to, agent_remark, created_at, updated_at')
+        $ticket = $ticketModel->select('id, user_id, title, category, priority, communication_method, description, attachment_name, status, department_id, assigned_to, agent_remark, created_at, updated_at')
                               ->find($id);
         if ($ticket && $ticket['status'] == 'Closed') {
              return redirect()->to('/admin/agent_tickets')->with('error', 'This ticket is closed and cannot be modified.');
@@ -170,7 +164,7 @@ class Support extends BaseController
         }
 
         $ticketModel = new SupportTicketModel();
-        $ticket = $ticketModel->select('id, user_id, title, subject, category, priority, communication_medium, description, attachment, status, department_id, assigned_to, agent_remark, created_at, updated_at')
+        $ticket = $ticketModel->select('id, user_id, title, category, priority, communication_method, description, attachment_name, status, department_id, assigned_to, agent_remark, created_at, updated_at')
                               ->find($id);
 
         if (!$ticket || $ticket['user_id'] != session()->get('user_id')) {
@@ -191,7 +185,7 @@ class Support extends BaseController
         }
 
         $ticketModel = new SupportTicketModel();
-        $ticket = $ticketModel->select('id, user_id, title, subject, category, priority, communication_medium, description, attachment, status, department_id, assigned_to, agent_remark, created_at, updated_at')
+        $ticket = $ticketModel->select('id, user_id, title, category, priority, communication_method, description, attachment_name, status, department_id, assigned_to, agent_remark, created_at, updated_at')
                               ->find($id);
 
         if (!$ticket || $ticket['user_id'] != session()->get('user_id')) {
@@ -234,7 +228,7 @@ class Support extends BaseController
         }
 
         $ticketModel = new SupportTicketModel();
-        $ticket = $ticketModel->select('id, user_id, title, subject, category, priority, communication_medium, description, attachment, status, department_id, assigned_to, agent_remark, created_at, updated_at')
+        $ticket = $ticketModel->select('id, user_id, title, category, priority, communication_method, description, attachment_name, status, department_id, assigned_to, agent_remark, created_at, updated_at')
                               ->find($id);
 
         if (!$ticket || $ticket['user_id'] != session()->get('user_id')) {
@@ -246,12 +240,11 @@ class Support extends BaseController
         }
 
         $fields = [
-            'subject' => 'subject',
-            'title'   => 'subject', 
-            'category' => 'category',
-            'priority' => 'priority',
-            'communication_medium' => 'communication_medium',
-            'description' => 'description'
+            'title'                => 'subject', 
+            'category'             => 'category',
+            'priority'             => 'priority',
+            'communication_method' => 'communication_medium',
+            'description'          => 'description'
         ];
 
         $updateData = [];
@@ -259,26 +252,31 @@ class Support extends BaseController
 
         foreach ($fields as $dbField => $postField) {
             $postValue = $this->request->getPost($postField);
-            if ($postValue !== null && $postValue != $ticket[$dbField]) {
+            
+            // Format priority if needed
+            if ($dbField === 'priority' && $postValue !== null) {
+                $postValue = ucfirst(strtolower($postValue));
+            }
+
+            if ($postValue !== null && $postValue != ($ticket[$dbField] ?? '')) {
                 $label = str_replace('_', ' ', $dbField);
-                $this->logChange($id, "edit_{$dbField}", $ticket[$dbField], $postValue, "Ticket " . ucwords($label) . " updated");
+                $this->logChange($id, "edit_{$dbField}", $ticket[$dbField] ?? '', $postValue, "Ticket " . ucwords($label) . " updated");
                 $updateData[$dbField] = $postValue;
                 $didChange = true;
             }
         }
 
-        // Handle file upload if any (INLINE DB STORAGE)
+        // Handle file upload if any (FILESYSTEM STORAGE)
         $file = $this->request->getFile('attachment');
         if ($file && $file->isValid() && !$file->hasMoved()) {
-            $newName = $file->getRandomName();
+            $attachmentRef = $file->getRandomName();
+            $file->move(FCPATH . 'uploads/tickets', $attachmentRef);
             
-            // Read file content and encode as hex for Postgres
-            $updateData['attachment_data'] = bin2hex(file_get_contents($file->getTempName()));
-            $updateData['attachment_mime'] = $file->getMimeType();
+            $oldFile = $ticket['attachment_name'] ?? '';
+            // Note: We could delete the old file here if desired
             
-            $oldFile = $ticket['attachment'];
-            $this->logChange($id, 'edit_attachment', $oldFile, $newName, "Ticket attachment updated");
-            $updateData['attachment'] = $newName;
+            $this->logChange($id, 'edit_attachment', $oldFile, $attachmentRef, "Ticket attachment updated");
+            $updateData['attachment_name'] = $attachmentRef;
             $didChange = true;
         }
 

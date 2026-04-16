@@ -129,7 +129,7 @@ $(document).ready(function() {
                     <div class="mb-4">
                         <div class="mb-3">
                             <label class="tkt-label"><i class="ti-pencil-alt text-primary me-2"></i>Title</label>
-                            <span class="dark_text fw_600 d-block">${t.subject}</span>
+                            <span class="dark_text fw_600 d-block">${t.title}</span>
                         </div>
                         <div class="mb-3">
                             <label class="tkt-label"><i class="ti-folder text-primary me-2"></i>Category</label>
@@ -140,7 +140,7 @@ $(document).ready(function() {
                         <label class="tkt-label">My Description</label>
                         <p class="mb-0 text-dark fs-13">${t.description}</p>
                     </div>
-                    ${t.attachment ? `<div class="mt-3 border-top pt-3 mb-3"><label class="tkt-label">Attachment</label><a href="<?= site_url('media/view/') ?>/${t.attachment}" target="_blank" class="text-primary fw_600 fs-13"><i class="ti-clip me-1"></i>${t.attachment}</a></div>` : ''}
+                    ${t.attachment_name ? `<div class="mt-3 border-top pt-3 mb-3"><label class="tkt-label">Attachment</label><a href="<?= site_url('media/view/') ?>/${t.attachment_name}" target="_blank" class="text-primary fw_600 fs-13"><i class="ti-clip me-1"></i>${t.attachment_name}</a></div>` : ''}
                     ${t.agent_remark ? `<div class="pt-3 border-top"><label class="tkt-label text-success">Team Response</label><p class="mb-0 text-dark fw_600 fs-13">${t.agent_remark}</p></div>` : ''}
                 `);
             }
@@ -181,7 +181,7 @@ $(document).ready(function() {
                 operation: 'query',
                 table: 'support_tickets',
                 filter_own: true,
-                fields: ['id', 'subject', 'category', 'priority', 'status', 'created_at']
+                fields: ['id', 'title', 'category', 'priority', 'status', 'created_at']
             }),
             success: function(response) {
                 const tickets = response.data.support_tickets;
@@ -198,7 +198,7 @@ $(document).ready(function() {
                         html += `
                         <tr>
                             <td><a href="javascript:void(0)" onclick="openViewModal(${t.id})" class="question_content">#TKT-${t.id}</a></td>
-                            <td>${t.subject}</td>
+                            <td>${t.title}</td>
                             <td>${t.category}</td>
                             <td><span class="badge ${bClass}">${priority.charAt(0).toUpperCase() + priority.slice(1)}</span></td>
                             <td><a href="javascript:void(0)" onclick="openViewModal(${t.id})" class="status_btn" style="background:${getStatusStyle(t.status)}; color:white; min-width:80px; text-align:center; display:inline-block;">${t.status || 'Open'}</a></td>

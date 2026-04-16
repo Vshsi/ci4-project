@@ -82,19 +82,20 @@
                                     <label class="form-label text-muted fw-bold mb-2 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;" for="priority">Priority Level</label>
                                     <select name="priority" id="priority" class="form-select form-control text-dark fw_600" style="border-radius: 8px; border: 1px solid #dee2e6; height: 48px; font-size: 14px; background: #fff;" required>
                                         <option value="">Select Priority</option>
-                                        <option value="low" <?= (isset($ticket) && strtolower($ticket['priority'] ?? '') == 'low') ? 'selected' : '' ?>>Low Level</option>
-                                        <option value="medium" <?= (isset($ticket) && strtolower($ticket['priority'] ?? '') == 'medium') ? 'selected' : '' ?>>Medium Level</option>
-                                        <option value="high" <?= (isset($ticket) && strtolower($ticket['priority'] ?? '') == 'high') ? 'selected' : '' ?>>High Level</option>
+                                        <option value="Low" <?= (isset($ticket) && ucfirst(strtolower($ticket['priority'] ?? '')) == 'Low') ? 'selected' : '' ?>>Low Level</option>
+                                        <option value="Medium" <?= (isset($ticket) && ucfirst(strtolower($ticket['priority'] ?? '')) == 'Medium') ? 'selected' : '' ?>>Medium Level</option>
+                                        <option value="High" <?= (isset($ticket) && ucfirst(strtolower($ticket['priority'] ?? '')) == 'High') ? 'selected' : '' ?>>High Level</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-2">
                                     <label class="form-label text-muted fw-bold mb-2 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;" for="medium">Communication Medium</label>
                                     <select name="communication_medium" id="medium" class="form-select form-control text-dark fw_600" style="border-radius: 8px; border: 1px solid #dee2e6; height: 48px; font-size: 14px; background: #fff;" required>
                                         <option value="">Select Medium</option>
-                                        <option value="Call" <?= (isset($ticket) && ($ticket['communication_medium'] ?? '') == 'Call') ? 'selected' : '' ?>>Direct Call</option>
-                                        <option value="Chat" <?= (isset($ticket) && ($ticket['communication_medium'] ?? '') == 'Chat') ? 'selected' : '' ?>>Live Chat</option>
-                                        <option value="WhatsApp" <?= (isset($ticket) && ($ticket['communication_medium'] ?? '') == 'WhatsApp') ? 'selected' : '' ?>>WhatsApp Message</option>
-                                        <option value="Online Meeting" <?= (isset($ticket) && ($ticket['communication_medium'] ?? '') == 'Online Meeting') ? 'selected' : '' ?>>Online Meeting</option>
+                                        <option value="Direct Call" <?= (isset($ticket) && ($ticket['communication_method'] ?? '') == 'Direct Call') ? 'selected' : '' ?>>Direct Call</option>
+                                        <option value="Live Chat" <?= (isset($ticket) && ($ticket['communication_method'] ?? '') == 'Live Chat') ? 'selected' : '' ?>>Live Chat</option>
+                                        <option value="Email" <?= (isset($ticket) && ($ticket['communication_method'] ?? '') == 'Email') ? 'selected' : '' ?>>Email</option>
+                                        <option value="WhatsApp" <?= (isset($ticket) && ($ticket['communication_method'] ?? '') == 'WhatsApp') ? 'selected' : '' ?>>WhatsApp Message</option>
+                                        <option value="Online Meeting" <?= (isset($ticket) && ($ticket['communication_method'] ?? '') == 'Online Meeting') ? 'selected' : '' ?>>Online Meeting</option>
                                     </select>
                                 </div>
 
@@ -108,11 +109,11 @@
                                 <div class="col-12 mb-4">
                                     <label class="form-label text-muted fw-bold mb-2 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;" for="attachment">Choose Files (Optional)</label>
                                     <input type="file" name="attachment" id="attachment" class="form-control" style="border-radius: 8px; border: 1px solid #dee2e6; padding: 10px; font-size: 13px; background: #fdfdfd;" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx">
-                                    <?php if($isEdit && !empty($ticket['attachment'])): ?>
+                                    <?php if($isEdit && !empty($ticket['attachment_name'])): ?>
                                         <div class="mt-2">
                                             <span class="text-muted small fw_700 text-uppercase" style="font-size: 9px;">Current File: </span>
-                                            <a href="<?= site_url('media/view/'.$ticket['attachment']) ?>" target="_blank" class="text-primary fw_600" style="font-size: 13px;">
-                                                <i class="ti-clip me-1"></i><?= htmlspecialchars($ticket['attachment']) ?>
+                                            <a href="<?= site_url('media/view/'.$ticket['attachment_name']) ?>" target="_blank" class="text-primary fw_600" style="font-size: 13px;">
+                                                <i class="ti-clip me-1"></i><?= htmlspecialchars($ticket['attachment_name']) ?>
                                             </a>
                                         </div>
                                     <?php endif; ?>

@@ -59,7 +59,7 @@
 
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted fw-bold mb-2">Phone <span class="text-danger">*</span></label>
-                                    <input type="text" name="phone" id="phone" class="form-control" style="border-radius: 8px; border: 1px solid #dee2e6; padding: 12px;" value="<?= esc($user['phone'] ?? '') ?>" placeholder="Enter 10-digit phone" maxlength="10">
+                                    <input type="text" name="phone" id="phone" class="form-control" style="border-radius: 8px; border: 1px solid #dee2e6; padding: 12px;" value="<?= esc($user['mobile'] ?? '') ?>" placeholder="Enter 10-digit phone" maxlength="10">
                                     <small class="text-danger d-none" id="phone_error"></small>
                                 </div>
                                 <div class="col-md-6 mb-4">

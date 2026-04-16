@@ -62,7 +62,7 @@
                             </li>
                         </div>
                         <div class="profile_info">
-                            <?php rtrim(base_url(), '/'); $sessPhoto = session()->get('photo'); ?>
+                            <?php $sessPhoto = session()->get('profile_image'); ?>
                             <img src="<?= !empty($sessPhoto) ? site_url('media/view/' . $sessPhoto) : base_url('img/client_img.png') ?>" alt="#" style="width:50px; height:50px; object-fit:cover; border-radius:50%;">
                             <div class="profile_info_iner">
                                 <div class="profile_author_name">

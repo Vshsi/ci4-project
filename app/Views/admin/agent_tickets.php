@@ -197,13 +197,13 @@ $(document).ready(function() {
         $.get('<?= site_url("support/getTicket/") ?>' + id, function(res) {
             if (res.status === 'success') {
                 const t = res.ticket;
-                $('#update_subject').text(t.subject);
+                $('#update_subject').text(t.title);
                 $('#update_description').text(t.description);
                 $('#update_status_val').val(t.status || 'Open');
                 $('#update_remark_val').val(t.agent_remark || '');
                 
-                if (t.attachment) {
-                    $('#update_attachment_box').html(`<div class="mb-3 border-top pt-2"><label class="tkt-label">Attachment</label><a href="<?= site_url('media/view/') ?>/${t.attachment}" target="_blank" class="text-primary fw_600" style="font-size: 13px;"><i class="ti-clip me-1"></i>${t.attachment}</a></div>`);
+                if (t.attachment_name) {
+                    $('#update_attachment_box').html(`<div class="mb-3 border-top pt-2"><label class="tkt-label">Attachment</label><a href="<?= site_url('media/view/') ?>/${t.attachment_name}" target="_blank" class="text-primary fw_600" style="font-size: 13px;"><i class="ti-clip me-1"></i>${t.attachment_name}</a></div>`);
                 } else {
                     $('#update_attachment_box').empty();
                 }
@@ -226,7 +226,7 @@ $(document).ready(function() {
                     <div class="mb-4">
                         <div class="mb-3">
                             <label class="text-muted small fw_700 mb-1 d-block text-uppercase" style="font-size: 10px;">Title</label>
-                            <span class="dark_text fw_600 d-block">${t.subject}</span>
+                            <span class="dark_text fw_600 d-block">${t.title}</span>
                         </div>
                         <div class="mb-3">
                             <label class="text-muted small fw_700 mb-1 d-block text-uppercase" style="font-size: 10px;">Category</label>
@@ -237,7 +237,7 @@ $(document).ready(function() {
                         <label class="text-muted small fw_700 mb-2 d-block text-uppercase" style="font-size: 10px;">Description</label>
                         <p class="mb-0 text-dark" style="font-size: 13.5px;">${t.description}</p>
                     </div>
-                    ${t.attachment ? `<div class="mb-3 border-top pt-2"><label class="text-muted small fw_700 mb-1 d-block text-uppercase" style="font-size: 10px;">Attachment</label><a href="<?= site_url('media/view/') ?>/${t.attachment}" target="_blank" class="text-primary fw_600" style="font-size: 13px;"><i class="ti-clip me-1"></i>${t.attachment}</a></div>` : ''}
+                    ${t.attachment_name ? `<div class="mb-3 border-top pt-2"><label class="text-muted small fw_700 mb-1 d-block text-uppercase" style="font-size: 10px;">Attachment</label><a href="<?= site_url('media/view/') ?>/${t.attachment_name}" target="_blank" class="text-primary fw_600" style="font-size: 13px;"><i class="ti-clip me-1"></i>${t.attachment_name}</a></div>` : ''}
                     ${t.agent_remark ? `<div class="pt-3 border-top"><label class="text-success small fw_700 mb-1 d-block text-uppercase" style="font-size: 10px;">Team Response</label><p class="mb-0 text-dark fw_600" style="font-size: 13px;">${t.agent_remark}</p></div>` : ''}
                 `);
             }
@@ -277,7 +277,7 @@ $(document).ready(function() {
             data: JSON.stringify({
                 operation: 'query',
                 table: 'support_tickets',
-                fields: ['id', 'user_id', 'subject', 'category', 'priority', 'status', 'created_at', 'attachment']
+                fields: ['id', 'user_id', 'title', 'category', 'priority', 'status', 'created_at', 'attachment_name']
             }),
             success: function(response) {
                 const tickets = response.data.support_tickets;
@@ -290,8 +290,8 @@ $(document).ready(function() {
                             <td><a href="javascript:void(0)" onclick="openAgentViewModal(${t.id})" class="question_content">#TKT-${t.id}</a></td>
                             <td>
                                 <div class="d-flex flex-column">
-                                    <span class="fw_600">${t.subject}</span>
-                                    ${t.attachment ? `<a href="<?= site_url('media/view/') ?>/${t.attachment}" target="_blank" class="text-primary mt-1 fw_700 fs-11"><i class="ti-clip me-1"></i>${t.attachment}</a>` : ''}
+                                    <span class="fw_600">${t.title}</span>
+                                    ${t.attachment_name ? `<a href="<?= site_url('media/view/') ?>/${t.attachment_name}" target="_blank" class="text-primary mt-1 fw_700 fs-11"><i class="ti-clip me-1"></i>${t.attachment_name}</a>` : ''}
                                 </div>
                             </td>
                             <td>${t.category}</td>

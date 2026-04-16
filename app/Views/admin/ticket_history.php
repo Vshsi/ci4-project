@@ -23,7 +23,7 @@
                                 <div class="col-md-7">
                                     <p class="mb-1 text-muted fw_800 text-uppercase" style="font-size: 10px; letter-spacing: 1px;">Ticket Identifier</p>
                                     <h4 class="dark_text fw_800 mb-0">LOG ID: #<?= $ticket['id'] ?></h4>
-                                    <p class="text-secondary mt-1 mb-0 fw_600" style="font-size: 14px;"><?= htmlspecialchars($ticket['subject']) ?></p>
+                                    <p class="text-secondary mt-1 mb-0 fw_600" style="font-size: 14px;"><?= htmlspecialchars($ticket['title']) ?></p>
                                 </div>
                                 <div class="col-md-5 text-md-end d-flex flex-column align-items-md-end gap-2">
                                     <?php 

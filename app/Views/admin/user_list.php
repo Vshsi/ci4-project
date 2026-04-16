@@ -71,7 +71,7 @@ $(document).ready(function() {
     function loadUsers() {
         const query = {
             operation: 'query',
-            fields: ['id', 'username', 'first_name', 'last_name', 'email', 'phone', 'photo']
+            fields: ['id', 'username', 'first_name', 'last_name', 'email', 'mobile', 'profile_image']
         };
 
         $.ajax({
@@ -100,13 +100,13 @@ $(document).ready(function() {
                         <tr>
                             <th scope="row">${index + 1}</th>
                             <td>
-                                <img src="${user.photo ? '<?= site_url("media/view/") ?>' + user.photo : '<?= base_url("img/client_img.png") ?>'}" alt="Profile" style="width:40px; height:40px; object-fit:cover; border-radius:50%;">
+                                <img src="${user.profile_image ? '<?= site_url("media/view/") ?>' + user.profile_image : '<?= base_url("img/client_img.png") ?>'}" alt="Profile" style="width:40px; height:40px; object-fit:cover; border-radius:50%;">
                             </td>
                             <td>${user.username}</td>
                             <td>${user.first_name || '-'}</td>
                             <td>${user.last_name || '-'}</td>
                             <td>${user.email}</td>
-                            <td>${user.phone || '-'}</td>
+                            <td>${user.mobile || '-'}</td>
                             <td>
                                 <div class="action_btns d-flex">
                                     <a href="<?= site_url('home/edit/') ?>${user.id}" class="action_btn mr_10" title="Edit">

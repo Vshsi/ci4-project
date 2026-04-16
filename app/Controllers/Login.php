@@ -27,23 +27,23 @@ class Login extends BaseController
         $username  = $this->request->getPost('username');
         $firstName = $this->request->getPost('first_name');
         $lastName  = $this->request->getPost('last_name');
-        $phone     = $this->request->getPost('phone');
+        $mobile    = $this->request->getPost('phone');
         $email     = $this->request->getPost('email');
-        $password  = $this->request->getPost('password');
+        $paswd     = $this->request->getPost('password');
 
         // 1. MANUAL VALIDATION 
-        if ($username == "" || $firstName == "" || $phone == "" || $email == "" || $password == "") {
-            $f = ($username == "") ? 'username' : (($firstName == "") ? 'first_name' : (($phone == "") ? 'phone' : (($email == "") ? 'email' : 'password')));
+        if ($username == "" || $firstName == "" || $mobile == "" || $email == "" || $paswd == "") {
+            $f = ($username == "") ? 'username' : (($firstName == "") ? 'first_name' : (($mobile == "") ? 'phone' : (($email == "") ? 'email' : 'password')));
             return $this->response->setJSON(['status' => 'error', 'field' => $f, 'message' => 'Required fields are missing!']);
         }
 
         // 2. Phone Check (10 digits)
-        if (!is_numeric($phone) || strlen($phone) != 10) {
+        if (!is_numeric($mobile) || strlen($mobile) != 10) {
             return $this->response->setJSON(['status' => 'error', 'field' => 'phone', 'message' => 'Phone must be exactly 10 digits!']);
         }
 
         // 3. Password Check
-        if (strlen($password) < 5) {
+        if (strlen($paswd) < 5) {
             return $this->response->setJSON(['status' => 'error', 'field' => 'password', 'message' => 'Password must be at least 5 characters!']);
         }
 
@@ -66,12 +66,15 @@ class Login extends BaseController
         $userModel = new UserModel();
 
         $data = [
-            'username'   => $username,
-            'first_name' => $firstName,
-            'last_name'  => $lastName,
-            'phone'      => $phone,
-            'email'      => $email,
-            'password'   => $password, // Keep raw as per legacy
+            'username'     => $username,
+            'first_name'   => $firstName,
+            'last_name'    => $lastName,
+            'mobile'       => $mobile,
+            'email'        => $email,
+            'email_id'     => $email,
+            'paswd'        => password_hash($paswd, PASSWORD_DEFAULT),
+            'user_type_id' => 2, // Student/User
+            'active'       => 1
         ];
 
         // 6. Existing User Check
@@ -95,14 +98,15 @@ class Login extends BaseController
         $email = $this->request->getPost('username');
         $pass  = $this->request->getPost('password');
 
-        $user = $userModel->where('email', $email)->where('password', $pass)->first();
+        $user = $userModel->where('email', $email)->orWhere('username', $email)->first();
 
-        if ($user) {
+        if ($user && password_verify($pass, $user['paswd'])) {
             session()->set([
-                'username' => $user['username'],
-                'user_id'  => $user['id'], 
-                'photo'    => $user['photo'],
-                'isLoggedIn' => true,
+                'username'     => $user['username'],
+                'user_id'      => $user['id'], 
+                'profile_image'=> $user['profile_image'],
+                'user_type'    => $user['user_type_id'],
+                'isLoggedIn'   => true,
             ]);
             
             return $this->response->setJSON(['status' => 'success', 'redirect' => site_url('home')]);
